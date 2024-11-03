@@ -15,6 +15,11 @@ app.use(express.urlencoded({ extended: false }));
 // Use the todoRouter for handling task-related routes
 app.use('/tasks', todoRouter);
 
+//For authentication
+import userRouter from './routes/userRouter.js';
+app.use('/user', userRouter);
+
+
 // Global error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.message);

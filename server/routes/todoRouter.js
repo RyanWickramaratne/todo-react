@@ -1,11 +1,12 @@
 import express from 'express';
 import pool from '../helpers/db.js';
 import { emptyOrRows } from '../helpers/utils.js';
+import { authenticateToken } from '../helpers/auth.js';
 
 const router = express.Router();
 
 // GET endpoint to fetch all tasks
-router.get('/', async (req, res, next) => {
+router.get('/', authenticateToken, async (req, res, next) => {
     try {
       const result = await pool.query('SELECT * FROM task');
       res.status(200).json(result.rows);
@@ -16,7 +17,7 @@ router.get('/', async (req, res, next) => {
   
 
 // POST endpoint to add a new task
-router.post('/', async (req, res, next) => {
+router.post('/', authenticateToken, async (req, res, next) => {
   const { description } = req.body;
   try {
     const result = await pool.query(
@@ -30,7 +31,7 @@ router.post('/', async (req, res, next) => {
 });
 
 // DELETE endpoint to remove a task by ID
-router.delete('/:id', async (req, res, next) => {
+router.delete('/:id', authenticateToken, async (req, res, next) => {
   const { id } = req.params;
   try {
     await pool.query('DELETE FROM task WHERE id = $1', [id]);
