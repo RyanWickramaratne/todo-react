@@ -20,7 +20,7 @@ describe('Todo API Tests', () =>
   // Test to check if we can get all tasks from the server
   it('should return all tasks', async () => {
     // Make a GET request to the server's root endpoint
-    const res = await chaiModule.request(app).get('/');
+    const res = await chaiModule.request(app).get('/tasks');
     
     // Check that we get a 200 status (OK)
     expect(res).to.have.status(200);
