@@ -1,48 +1,77 @@
-import React, { useState } from 'react';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Row from './components/Row'; // Adjust the path if needed
 
 function App() {
-  const [task, setTask] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [newTaskDescription, setNewTaskDescription] = useState('');
 
-  const handleInputChange = (e) => {
-    setTask(e.target.value);
+  // Fetch tasks when the component mounts
+  useEffect(() => {
+    axios.get('http://localhost:3001/')
+      .then(response => {
+        setTasks(response.data);
+      })
+      .catch(error => {
+        if (error.response) {
+          alert(`Error: ${error.response.data.error}`);
+        } else {
+          alert('Network error: Unable to fetch data');
+        }
+      });
+  }, []);
+
+  // Function to delete a task by ID
+  const deleteTask = (id) => {
+    axios.delete(`http://localhost:3001/tasks/${id}`)
+      .then(() => {
+        setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+      })
+      .catch(error => {
+        if (error.response) {
+          alert(`Error: ${error.response.data.error}`);
+        } else {
+          alert('Network error: Unable to delete task');
+        }
+      });
   };
 
-  const handleAddTask = (event) => {
-    event.preventDefault();
-    if (task.trim()) {
-      setTasks([...tasks, task]);
-      setTask('');
+  // Function to add a new task
+  const addTask = () => {
+    if (!newTaskDescription) {
+      alert('Task description cannot be empty');
+      return;
     }
-  };
 
-  const handleDeleteTask = (taskToDelete) => {
-    setTasks(tasks.filter((t) => t !== taskToDelete));
+    axios.post('http://localhost:3001/tasks', { description: newTaskDescription })
+      .then(response => {
+        setTasks([...tasks, response.data]);
+        setNewTaskDescription('');
+      })
+      .catch(error => {
+        if (error.response) {
+          alert(`Error: ${error.response.data.error}`);
+        } else {
+          alert('Network error: Unable to add task');
+        }
+      });
   };
 
   return (
-    <div className="App">
+    <div>
       <h1>Todo List</h1>
-
-      <form onSubmit={handleAddTask}>
-        <input
-          type="text"
-          value={task}
-          onChange={handleInputChange}
-          placeholder="Add a new task"
-        />
-        <button type="submit">Add</button>
-      </form>
-
       <ul>
-        {tasks.map((task, index) => (
-          <li key={index}>
-            {task} <button onClick={() => handleDeleteTask(task)}>Delete</button>
-          </li>
+        {tasks.map(task => (
+          <Row key={task.id} item={task} deleteTask={deleteTask} />
         ))}
       </ul>
-
+      <input
+        type="text"
+        value={newTaskDescription}
+        onChange={(e) => setNewTaskDescription(e.target.value)}
+        placeholder="New task"
+      />
+      <button onClick={addTask}>Add Task</button>
     </div>
   );
 }
