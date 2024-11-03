@@ -1,23 +1,48 @@
-import logo from './logo.svg';
+import React, { useState } from 'react';
 import './App.css';
 
 function App() {
+  const [task, setTask] = useState('');
+  const [tasks, setTasks] = useState([]);
+
+  const handleInputChange = (e) => {
+    setTask(e.target.value);
+  };
+
+  const handleAddTask = (event) => {
+    event.preventDefault();
+    if (task.trim()) {
+      setTasks([...tasks, task]);
+      setTask('');
+    }
+  };
+
+  const handleDeleteTask = (taskToDelete) => {
+    setTasks(tasks.filter((t) => t !== taskToDelete));
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Todo List</h1>
+
+      <form onSubmit={handleAddTask}>
+        <input
+          type="text"
+          value={task}
+          onChange={handleInputChange}
+          placeholder="Add a new task"
+        />
+        <button type="submit">Add</button>
+      </form>
+
+      <ul>
+        {tasks.map((task, index) => (
+          <li key={index}>
+            {task} <button onClick={() => handleDeleteTask(task)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+
     </div>
   );
 }
