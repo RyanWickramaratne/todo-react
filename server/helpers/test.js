@@ -19,6 +19,11 @@ export async function insertTestUser() {
 }
 
 // Function to generate a JWT token for a given email
-export function getToken(email) {
-  return jwt.sign({ email }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+export async function getToken(email) {
+  const userResult = await pool.query('SELECT * FROM account WHERE email = $1', [email]);
+  const user = userResult.rows[0];
+  if (!user) throw new Error('User not found');
+
+  // Ensure the payload includes the `id`
+  return jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
 }

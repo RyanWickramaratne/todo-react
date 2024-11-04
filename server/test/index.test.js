@@ -11,10 +11,10 @@ describe('Todo API Tests', () => {
 
   before(async () => {
     await insertTestUser();
-    token = getToken('testuser@example.com');
+    token = await getToken('testuser@example.com');
   });
 
-  it('should return all tasks', async () => {
+  it('should return all tasks for the authenticated user', async () => {
     const res = await chaiModule.request(app)
       .get('/tasks')
       .set('Authorization', `Bearer ${token}`);
@@ -22,11 +22,11 @@ describe('Todo API Tests', () => {
     expect(res).to.have.status(200);
     expect(res.body).to.be.an('array');
     if (res.body.length > 0) {
-      expect(res.body[0]).to.have.keys('id', 'description');
+      expect(res.body[0]).to.have.keys('id', 'description', 'user_id');
     }
   });
 
-  it('should create a new task', async () => {
+  it('should create a new task for the authenticated user', async () => {
     const newTask = { description: 'Test Task' };
     const res = await chaiModule.request(app)
       .post('/tasks')
@@ -36,16 +36,22 @@ describe('Todo API Tests', () => {
     expect(res).to.have.status(201);
     expect(res.body).to.be.an('object');
     expect(res.body).to.have.property('id');
+    expect(res.body).to.have.property('user_id');
     expect(res.body.description).to.equal('Test Task');
   });
 
-  it('should delete a task by ID', async () => {
+  it('should delete a task by ID for the authenticated user', async () => {
     const newTask = { description: 'Task to Delete' };
     const createRes = await chaiModule.request(app)
       .post('/tasks')
       .set('Authorization', `Bearer ${token}`)
       .send(newTask);
     const taskId = createRes.body.id;
+
+    expect(createRes).to.have.status(201);
+    expect(taskId).to.exist;
+
+    console.log(`Created task ID for deletion: ${taskId}`); // Debug log
 
     const deleteRes = await chaiModule.request(app)
       .delete(`/tasks/${taskId}`)
@@ -61,16 +67,16 @@ describe('Todo API Tests', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({});
 
-    expect(res).to.have.status(500);
+    expect(res).to.have.status(400);
     expect(res.body).to.have.property('error');
   });
 
-  it('should handle invalid ID deletion', async () => {
+  it('should handle invalid ID deletion gracefully', async () => {
     const res = await chaiModule.request(app)
       .delete('/tasks/invalid-id')
       .set('Authorization', `Bearer ${token}`);
 
-    expect(res).to.have.status(500);
-    expect(res.body).to.have.property('error');
+    expect(res).to.have.status(400);
+    expect(res.body).to.have.property('error', 'Invalid task ID format');
   });
 });
