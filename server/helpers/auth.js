@@ -14,7 +14,7 @@ export function authenticateToken(req, res, next) {
       return res.status(403).json({ error: 'Invalid token' });
     }
     req.user = user;
-    console.log('Authenticated user:', req.user); // Add this for debugging
+    console.log('Authenticated user:', req.user); // This for debugging
     next();
   });
 }

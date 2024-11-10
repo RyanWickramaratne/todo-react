@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Row from '../components/Row'; // Ensure this path is correct
+import Row from '../components/Row';
 import { useUser } from '../context/UserContext';
+import '../styles.css';
 
 function Home() {
   const { user } = useUser();
@@ -14,41 +15,35 @@ function Home() {
       return;
     }
 
-    console.log('Fetching tasks with user token:', user.token);
     axios.get(`${process.env.REACT_APP_BACKEND_URL}/tasks`, {
-      headers: { Authorization: `Bearer ${user.token}` }
+      headers: { Authorization: `Bearer ${user.token}` },
     })
-    .then(response => {
-      console.log('Tasks fetched successfully:', response.data);
-      setTasks(response.data);
-    })
-    .catch(error => {
-      console.error('Error fetching tasks:', error);
-      if (error.response) {
-        alert(`Error: ${error.response.data.error}`);
-      } else {
-        alert('Network error: Unable to fetch data');
-      }
-    });
+      .then(response => {
+        setTasks(response.data);
+      })
+      .catch(error => {
+        if (error.response) {
+          alert(`Error: ${error.response.data.error}`);
+        } else {
+          alert('Network error: Unable to fetch data');
+        }
+      });
   }, [user]);
 
   const deleteTask = (id) => {
-    console.log(`Attempting to delete task with ID: ${id}`);
     axios.delete(`${process.env.REACT_APP_BACKEND_URL}/tasks/${id}`, {
-      headers: { Authorization: `Bearer ${user.token}` }
+      headers: { Authorization: `Bearer ${user.token}` },
     })
-    .then(() => {
-      console.log(`Task with ID ${id} deleted successfully.`);
-      setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
-    })
-    .catch(error => {
-      console.error(`Error deleting task with ID ${id}:`, error);
-      if (error.response) {
-        alert(`Error: ${error.response.data.error}`);
-      } else {
-        alert('Network error: Unable to delete task');
-      }
-    });
+      .then(() => {
+        setTasks(prevTasks => prevTasks.filter(task => task.id !== id));
+      })
+      .catch(error => {
+        if (error.response) {
+          alert(`Error: ${error.response.data.error}`);
+        } else {
+          alert('Network error: Unable to delete task');
+        }
+      });
   };
 
   const addTask = () => {
@@ -57,27 +52,25 @@ function Home() {
       return;
     }
 
-    console.log('Adding new task:', newTaskDescription);
-    axios.post(`${process.env.REACT_APP_BACKEND_URL}/tasks`, { description: newTaskDescription }, {
-      headers: { Authorization: `Bearer ${user.token}` }
-    })
-    .then(response => {
-      console.log('New task added successfully:', response.data);
-      setTasks([...tasks, response.data]);
-      setNewTaskDescription('');
-    })
-    .catch(error => {
-      console.error('Error adding task:', error);
-      if (error.response) {
-        alert(`Error: ${error.response.data.error}`);
-      } else {
-        alert('Network error: Unable to add task');
-      }
-    });
+    axios.post(`${process.env.REACT_APP_BACKEND_URL}/tasks`, 
+      { description: newTaskDescription },
+      { headers: { Authorization: `Bearer ${user.token}` } }
+    )
+      .then(response => {
+        setTasks([...tasks, response.data]);
+        setNewTaskDescription('');
+      })
+      .catch(error => {
+        if (error.response) {
+          alert(`Error: ${error.response.data.error}`);
+        } else {
+          alert('Network error: Unable to add task');
+        }
+      });
   };
 
   return (
-    <div>
+    <div className="container">
       <h1>Todo List</h1>
       <ul>
         {tasks.map(task => (

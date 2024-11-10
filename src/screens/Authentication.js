@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
+import '../styles.css';
 
 function Authentication({ mode }) {
   const { signUp, signIn } = useUser();
@@ -13,13 +14,10 @@ function Authentication({ mode }) {
     e.preventDefault();
     try {
       if (isSignUp) {
-        const token = await signUp(email, password);
-        console.log('Received Token on Sign Up:', token);
+        await signUp(email, password);
       } else {
-        const token = await signIn(email, password);
-        console.log('Received Token on Sign In:', token);
+        await signIn(email, password);
       }
-      console.log('Stored Token:', sessionStorage.getItem('token'));
       navigate('/');
     } catch (error) {
       alert('Error: ' + (error.response ? error.response.data.error : 'General error'));
@@ -27,13 +25,20 @@ function Authentication({ mode }) {
   };
 
   return (
-    <div>
+    <div className="container">
       <h2>{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="auth-form">
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
         <button type="submit">{isSignUp ? 'Register' : 'Login'}</button>
       </form>
+      <div className="link">
+        {isSignUp ? (
+          <p>Already have an account? <Link to="/signin">Sign In</Link></p>
+        ) : (
+          <p>Don't have an account? <Link to="/signup">Sign Up</Link></p>
+        )}
+      </div>
     </div>
   );
 }
